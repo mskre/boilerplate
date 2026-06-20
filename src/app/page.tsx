@@ -2,205 +2,270 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 
-const bubbleMessages = [
-  "currently under development",
-  "under construction",
-  "todo",
-  "still tying knots",
-  "coming soon",
+const splashRings = [
+  "splash-ring splash-ring-1",
+  "splash-ring splash-ring-2",
+  "splash-ring splash-ring-3",
+  "splash-ring splash-ring-4",
+  "splash-ring splash-ring-5",
+  "splash-ring splash-ring-6",
 ];
+
+const constructionBubbles = [
+  { text: "under construction", width: 138, x: 666, y: 284, delay: 0 },
+  { text: "being made", width: 98, x: 626, y: 346, delay: 7.2 },
+  { text: "under development", width: 138, x: 676, y: 404, delay: 14.4 },
+  { text: "soon", width: 54, x: 626, y: 456, delay: 21.6 },
+];
+
+const bubbleCycleSeconds = 28.8;
+const bubbleDurationSeconds = 6.4;
+const fishMouth = { x: 590, y: 502 };
 
 export default function Home() {
   const reduceMotion = useReducedMotion() === true;
 
-  const reelAnimation = reduceMotion
-    ? { opacity: 1, y: 0 }
-    : {
-        opacity: [1, 1, 1, 0, 0, 1],
-        y: ["18vh", "8vh", "-118vh", "-118vh", "18vh", "18vh"],
-      };
-
-  const reelTransition = reduceMotion
-    ? undefined
-    : {
-        duration: 14,
-        ease: "easeInOut" as const,
-        repeat: Infinity,
-        times: [0, 0.24, 0.7, 0.82, 0.83, 1],
-      };
-
   return (
-    <main className="landing-shell">
-      <nav className="navbar" aria-label="Primary navigation">
-        <a className="brand" href="/" aria-label="mskre home">
+    <main className="ocean-stage" aria-label="Cartoon fisherman in a boat">
+      <nav className="minimal-nav" aria-label="Primary navigation">
+        <a className="nav-brand" href="/" aria-label="mskre home">
           mskre
         </a>
-        <button className="login-button" type="button" aria-disabled="true">
+        <button className="nav-login" type="button" aria-disabled="true">
           login
         </button>
       </nav>
 
-      <section className="hero" aria-labelledby="hero-title">
-        <div className="hero-copy">
-          <p className="eyebrow">boilerplate harbor</p>
-          <h1 id="hero-title">A fresh catch is still on the line.</h1>
-          <p className="lede">
-            This Next.js shell is ready for whatever gets built next. For now,
-            the fish is handling construction updates.
-          </p>
+      <div className="scene" aria-hidden="true">
+        <div className="splash-field">
+          {splashRings.map((className, index) => (
+            <motion.span
+              className={className}
+              key={className}
+              animate={
+                reduceMotion
+                  ? undefined
+                  : { opacity: [0, 0.72, 0], scale: [0.45, 1, 1.35] }
+              }
+              transition={
+                reduceMotion
+                  ? undefined
+                  : {
+                      delay: index * 0.42,
+                      duration: 2.8,
+                      ease: "easeOut",
+                      repeat: Infinity,
+                    }
+              }
+            />
+          ))}
         </div>
 
-        <div className="scene-window" aria-label="Animated fishing construction placeholder">
-          <p className="sr-only">
-            Currently under development. Under construction. Todo. Coming soon.
-          </p>
-          <div className="sun-glow" />
-          <div className="cloud cloud-one" />
-          <div className="cloud cloud-two" />
-          <div className="sea-layer sea-back" />
-          <div className="wave wave-one" />
-          <div className="wave wave-two" />
-          <div className="wave wave-three" />
-
-          <div className="reel-anchor" aria-hidden="true">
-            <motion.div
-              className="reel-track"
-              animate={reelAnimation}
-              transition={reelTransition}
-            >
-              <FishingRig reduceMotion={reduceMotion} />
-            </motion.div>
-          </div>
-
-          <div className="sea-layer sea-front" />
-          <div className="foam foam-left" />
-          <div className="foam foam-right" />
-        </div>
-      </section>
+        <CartoonFishingBoat reduceMotion={reduceMotion} />
+      </div>
+      <span className="sr-only">A fisherman in a boat catches a fish.</span>
     </main>
   );
 }
 
-function FishingRig({ reduceMotion }: { reduceMotion: boolean }) {
-  const boatAnimation = reduceMotion
-    ? undefined
-    : { rotate: [-1.5, 1.4, -1.5], y: [0, -8, 0] };
-
-  const boatTransition = reduceMotion
-    ? undefined
-    : { duration: 4.8, ease: "easeInOut" as const, repeat: Infinity };
-
-  const hookAnimation = reduceMotion
-    ? undefined
-    : { rotate: [0, -2.2, 1.6, 0], y: [0, -16, 3, 0] };
-
-  const hookTransition = reduceMotion
-    ? undefined
-    : { duration: 3.6, ease: "easeInOut" as const, repeat: Infinity };
-
+function CartoonFishingBoat({ reduceMotion }: { reduceMotion: boolean }) {
   return (
-    <svg className="fishing-rig" viewBox="0 0 760 650">
-      <motion.g
-        className="boat-rock"
-        animate={boatAnimation}
-        transition={boatTransition}
-        style={{ originX: "50%", originY: "50%" }}
-      >
-        <path
-          className="boat-shadow"
-          d="M112 300 C205 344 468 357 628 296 C585 371 196 387 112 300Z"
+    <svg className="fishing-illustration" viewBox="0 0 760 620">
+      <defs>
+        <filter id="soft-ink" x="-12%" y="-12%" width="124%" height="124%">
+          <feTurbulence
+            baseFrequency="0.012"
+            numOctaves="2"
+            result="grain"
+            seed="11"
+            type="fractalNoise"
+          />
+          <feDisplacementMap in="SourceGraphic" in2="grain" scale="1.4" />
+        </filter>
+      </defs>
+
+      <g className="distant-reeds">
+        <path d="M97 353 L97 318" />
+        <path d="M111 357 L116 331" />
+        <path d="M651 358 L651 326" />
+        <path d="M666 357 L673 336" />
+      </g>
+
+      <g className="boat-reflection" filter="url(#soft-ink)">
+        <path d="M222 354 C297 371 450 373 534 350" />
+        <path d="M246 370 C315 388 442 390 501 368" />
+        <path d="M283 388 C329 399 419 400 463 386" />
+        <path d="M304 347 C306 389 303 424 298 456" />
+        <path d="M322 351 C323 391 322 428 317 464" />
+      </g>
+
+      <g className="water-lines">
+        <path d="M171 355 C231 347 271 363 333 354 C404 342 462 365 581 352" />
+        <path d="M203 375 C270 368 315 383 383 374 C439 366 487 381 563 371" />
+        <path d="M257 397 C307 391 354 403 413 396 C472 388 510 398 556 392" />
+      </g>
+
+      <g className="boat-silhouette" filter="url(#soft-ink)">
+        <path d="M214 309 C278 331 457 333 548 300 C536 329 500 350 442 359 C350 374 254 352 224 325 C218 319 215 313 214 309Z" />
+        <path d="M225 306 C303 320 462 321 556 295 C548 311 538 324 526 334 C438 346 312 345 233 326Z" />
+      </g>
+
+      <g className="lonely-fisherman" filter="url(#soft-ink)">
+        <path className="hidden-arm" d="M345 246 L412 205" />
+        <path className="body" d="M306 214 C321 196 352 197 367 218 C370 249 363 281 350 304 C329 308 306 300 294 284 C293 254 296 231 306 214Z" />
+        <path className="lap" d="M294 283 C316 298 349 300 371 285 C367 305 352 318 327 318 C306 318 295 305 294 283Z" />
+        <path className="face-shadow" d="M309 187 C317 171 346 167 360 181 C364 194 356 205 339 209 C322 209 311 201 309 187Z" />
+        <path className="rain-hat-brim" d="M278 180 C307 154 361 150 397 175 C368 197 314 201 278 180Z" />
+        <path className="rain-hat-crown" d="M310 161 C322 132 370 132 383 163 C364 177 331 178 310 161Z" />
+        <path className="hat-crease" d="M313 162 C335 171 361 171 381 162" />
+        <path className="hand" d="M407 199 C418 192 428 205 418 215 C407 223 397 207 407 199Z" />
+      </g>
+
+      <g className="rod-rig" filter="url(#soft-ink)">
+        <path className="rod" d="M414 207 L577 124" />
+        <path className="fishing-line" d="M577 124 L577 485" />
+        <path className="hook" d="M577 485 C590 498 574 513 560 499" />
+      </g>
+
+      <g className="fish-catch" filter="url(#soft-ink)">
+        <path className="fish-tail" d="M516 497 L488 477 L498 501 L486 524Z" />
+        <path className="fish-body" d="M510 500 C525 474 569 478 588 503 C567 529 526 529 510 500Z" />
+        <path className="fish-mark" d="M526 513 C543 526 570 521 584 504" />
+        <circle className="fish-eye" cx="571" cy="495" r="4" />
+      </g>
+
+      <g className="construction-bubbles" filter="url(#soft-ink)">
+        {constructionBubbles.map((bubble) => (
+          <motion.g
+            animate={
+              reduceMotion
+                ? { opacity: 1, scale: 1, x: bubble.x, y: bubble.y }
+                : {
+                    opacity: [0.24, 0.72, 0.96, 0.9, 0],
+                    scale: [0.06, 0.22, 0.74, 1, 1.04],
+                    x: [
+                      fishMouth.x,
+                      fishMouth.x + 6,
+                      bubble.x - 8,
+                      bubble.x,
+                      bubble.x + 8,
+                    ],
+                    y: [
+                      fishMouth.y,
+                      fishMouth.y - 34,
+                      bubble.y + 42,
+                      bubble.y,
+                      bubble.y - 18,
+                    ],
+                  }
+            }
+            className="text-bubble"
+            initial={false}
+            key={bubble.text}
+            style={{ transformBox: "fill-box", transformOrigin: "center" }}
+            transition={
+              reduceMotion
+                ? undefined
+                : {
+                    delay: bubble.delay,
+                    duration: bubbleDurationSeconds,
+                    ease: "easeOut",
+                    repeat: Infinity,
+                    repeatDelay: bubbleCycleSeconds - bubbleDurationSeconds,
+                    times: [0, 0.2, 0.52, 0.78, 1],
+                  }
+            }
+          >
+            <rect x={bubble.width / -2} y="-14" width={bubble.width} height="28" rx="14" />
+            <text y="4.5" textAnchor="middle">
+              {bubble.text}
+            </text>
+          </motion.g>
+        ))}
+        <motion.circle
+          animate={
+            reduceMotion
+              ? undefined
+              : {
+                  cx: [fishMouth.x, fishMouth.x + 7, fishMouth.x + 14],
+                  cy: [fishMouth.y, fishMouth.y - 34, fishMouth.y - 70],
+                  opacity: [0, 0.78, 0],
+                  r: [1, 4, 5],
+                }
+          }
+          className="tiny-bubble"
+          cx={fishMouth.x}
+          cy={fishMouth.y}
+          initial={false}
+          r="1"
+          transition={
+            reduceMotion
+              ? undefined
+              : {
+                  duration: 3.8,
+                  ease: "easeOut",
+                  repeat: Infinity,
+                  repeatDelay: bubbleCycleSeconds - 3.8,
+                }
+          }
         />
-        <path
-          className="boat-hull"
-          d="M96 245 C172 301 483 315 650 238 C626 285 585 324 519 341 C389 375 201 341 142 300 C120 285 105 266 96 245Z"
+        <motion.circle
+          animate={
+            reduceMotion
+              ? undefined
+              : {
+                  cx: [fishMouth.x, fishMouth.x - 8, fishMouth.x - 12],
+                  cy: [fishMouth.y, fishMouth.y - 42, fishMouth.y - 82],
+                  opacity: [0, 0.64, 0],
+                  r: [1, 3, 4],
+                }
+          }
+          className="tiny-bubble"
+          cx={fishMouth.x}
+          cy={fishMouth.y}
+          initial={false}
+          r="1"
+          transition={
+            reduceMotion
+              ? undefined
+              : {
+                  delay: 7.2,
+                  duration: 3.8,
+                  ease: "easeOut",
+                  repeat: Infinity,
+                  repeatDelay: bubbleCycleSeconds - 3.8,
+                }
+          }
         />
-        <path
-          className="boat-rim"
-          d="M126 239 C246 270 492 270 624 231"
+        <motion.circle
+          animate={
+            reduceMotion
+              ? undefined
+              : {
+                  cx: [fishMouth.x, fishMouth.x + 2, fishMouth.x + 5],
+                  cy: [fishMouth.y, fishMouth.y - 50, fishMouth.y - 94],
+                  opacity: [0, 0.68, 0],
+                  r: [1, 3.5, 4.5],
+                }
+          }
+          className="tiny-bubble"
+          cx={fishMouth.x}
+          cy={fishMouth.y}
+          initial={false}
+          r="1"
+          transition={
+            reduceMotion
+              ? undefined
+              : {
+                  delay: 14.4,
+                  duration: 3.8,
+                  ease: "easeOut",
+                  repeat: Infinity,
+                  repeatDelay: bubbleCycleSeconds - 3.8,
+                }
+          }
         />
-        <path
-          className="boat-stripe"
-          d="M169 292 C280 321 435 324 555 289"
-        />
-        <path className="oar" d="M171 249 C91 257 58 290 37 341" />
-
-        <g className="fisherman">
-          <path className="leg" d="M326 229 C365 251 405 257 451 242" />
-          <path
-            className="coat"
-            d="M293 180 C316 155 365 158 388 188 L374 235 L308 232Z"
-          />
-          <circle className="head" cx="337" cy="141" r="25" />
-          <path
-            className="beard"
-            d="M320 151 C328 179 351 181 363 154 C348 168 331 167 320 151Z"
-          />
-          <path
-            className="hat-brim"
-            d="M291 122 C317 107 363 106 392 123 C358 136 321 137 291 122Z"
-          />
-          <path
-            className="hat-crown"
-            d="M315 114 C326 86 361 87 374 116 C356 123 333 124 315 114Z"
-          />
-          <path
-            className="arm"
-            d="M374 184 C410 160 428 143 452 119"
-          />
-          <circle className="hand" cx="452" cy="119" r="8" />
-          <circle className="reel" cx="435" cy="145" r="13" />
-          <path className="rod" d="M447 116 C523 70 602 84 672 128" />
-        </g>
-      </motion.g>
-
-      <path className="line" d="M672 128 C703 218 660 330 608 405" />
-
-      <motion.g
-        className="hook-load"
-        animate={hookAnimation}
-        transition={hookTransition}
-        style={{ originX: "78%", originY: "63%" }}
-      >
-        <path className="hook" d="M608 405 C630 425 611 451 590 437" />
-        <g className="fish" transform="translate(600 416)">
-          <path className="fish-tail" d="M-54 0 L-94 -28 L-82 0 L-94 28Z" />
-          <ellipse className="fish-body" cx="0" cy="0" rx="58" ry="30" />
-          <path className="fish-belly" d="M-29 15 C1 32 39 22 54 4" />
-          <circle className="fish-eye" cx="32" cy="-9" r="5" />
-          <path className="fish-mouth" d="M48 7 C59 10 59 20 48 22" />
-          <path className="fish-fin" d="M-12 -5 C8 -24 27 -20 17 -2" />
-        </g>
-
-        <g className="bubble-stack">
-          {bubbleMessages.map((message, index) => (
-            <g
-              className={`bubble-message bubble-message-${index + 1}`}
-              key={message}
-            >
-              <rect width="240" height="42" rx="21" />
-              <text x="120" y="27" textAnchor="middle">
-                {message}
-              </text>
-            </g>
-          ))}
-        </g>
-
-        <g className="screen-catch" transform="translate(432 478)">
-          <path className="screen-tether" d="M148 -33 L148 -3" />
-          <rect className="screen-frame" width="296" height="150" rx="26" />
-          <rect className="screen-top" x="17" y="17" width="262" height="28" rx="14" />
-          <circle className="screen-dot" cx="42" cy="31" r="5" />
-          <circle className="screen-dot" cx="61" cy="31" r="5" />
-          <circle className="screen-dot" cx="80" cy="31" r="5" />
-          <path className="screen-wave" d="M30 87 C75 59 105 119 151 88 C194 58 223 116 266 82" />
-          <text className="screen-title" x="148" y="76" textAnchor="middle">
-            site placeholder
-          </text>
-          <text className="screen-subtitle" x="148" y="122" textAnchor="middle">
-            reeling in soon
-          </text>
-        </g>
-      </motion.g>
+      </g>
     </svg>
   );
 }
