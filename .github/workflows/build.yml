@@ -1,0 +1,118 @@
+name: Build and deploy Docker image
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: boilerplate-production
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_LATEST: ghcr.io/${{ github.repository }}:latest
+  IMAGE_SHA: ghcr.io/${{ github.repository }}:sha-${{ github.sha }}
+  KUBE_NAMESPACE: boilerplate
+  KUBE_DEPLOYMENT: boilerplate
+  KUBE_CONTAINER: boilerplate
+
+jobs:
+  build:
+    runs-on: [self-hosted]
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.IMAGE_LATEST }}
+            ${{ env.IMAGE_SHA }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  deploy:
+    runs-on: [self-hosted]
+    needs: build
+    permissions:
+      contents: read
+
+    steps:
+      - name: Install kubectl
+        run: |
+          set -euo pipefail
+
+          if command -v kubectl >/dev/null 2>&1; then
+            exit 0
+          fi
+
+          if ! command -v curl >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y --no-install-recommends ca-certificates curl
+          fi
+
+          case "$(uname -m)" in
+            x86_64) kubectl_arch="amd64" ;;
+            aarch64|arm64) kubectl_arch="arm64" ;;
+            *) echo "::error::Unsupported architecture: $(uname -m)"; exit 1 ;;
+          esac
+
+          kubectl_version="$(curl -fsSL https://dl.k8s.io/release/stable.txt)"
+          install -d "${RUNNER_TEMP}/bin"
+          curl -fsSL -o "${RUNNER_TEMP}/bin/kubectl" "https://dl.k8s.io/release/${kubectl_version}/bin/linux/${kubectl_arch}/kubectl"
+          chmod +x "${RUNNER_TEMP}/bin/kubectl"
+          echo "${RUNNER_TEMP}/bin" >> "${GITHUB_PATH}"
+
+      - name: Roll out latest image on k3s
+        run: |
+          set -euo pipefail
+
+          token_file="/var/run/secrets/kubernetes.io/serviceaccount/token"
+          ca_file="/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+
+          if [ ! -r "${token_file}" ] || [ ! -r "${ca_file}" ]; then
+            echo "::error::Kubernetes service account token is not mounted in this runner pod"
+            exit 1
+          fi
+
+          kubectl_base=(
+            kubectl
+            --server=https://kubernetes.default.svc
+            --certificate-authority="${ca_file}"
+            --token="$(cat "${token_file}")"
+            -n "${KUBE_NAMESPACE}"
+          )
+
+          restarted_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          patch_payload="{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"loading.mskre.no/image-sha\":\"${GITHUB_SHA}\",\"kubectl.kubernetes.io/restartedAt\":\"${restarted_at}\"}},\"spec\":{\"containers\":[{\"name\":\"${KUBE_CONTAINER}\",\"image\":\"${IMAGE_LATEST}\",\"imagePullPolicy\":\"Always\"}]}}}}"
+
+          "${kubectl_base[@]}" patch deployment "${KUBE_DEPLOYMENT}" --type=strategic -p "${patch_payload}"
+          "${kubectl_base[@]}" rollout status deployment/"${KUBE_DEPLOYMENT}" --timeout=300s
