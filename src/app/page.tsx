@@ -19,8 +19,19 @@ const constructionBubbles = [
 ];
 
 const bubbleCycleSeconds = 28.8;
-const bubbleDurationSeconds = 6.4;
 const fishMouth = { x: 590, y: 502 };
+const bubbleKeyTimes = "0;0.06;0.14;0.2;0.23;1";
+
+const mouthPuffs = [
+  { x: 7, y: -64, size: 5, delay: 0 },
+  { x: -10, y: -74, size: 4, delay: 0.45 },
+  { x: 6, y: -68, size: 4.5, delay: 7.2 },
+  { x: -8, y: -78, size: 3.5, delay: 7.65 },
+  { x: 9, y: -70, size: 5, delay: 14.4 },
+  { x: -7, y: -82, size: 4, delay: 14.85 },
+  { x: 5, y: -62, size: 4, delay: 21.6 },
+  { x: -9, y: -72, size: 3.5, delay: 22.05 },
+];
 
 export default function Home() {
   const reduceMotion = useReducedMotion() === true;
@@ -136,135 +147,109 @@ function CartoonFishingBoat({ reduceMotion }: { reduceMotion: boolean }) {
 
       <g className="construction-bubbles" filter="url(#soft-ink)">
         {constructionBubbles.map((bubble) => (
-          <motion.g
-            animate={
-              reduceMotion
-                ? { opacity: 1, scale: 1, x: bubble.x, y: bubble.y }
-                : {
-                    opacity: [0.24, 0.72, 0.96, 0.9, 0],
-                    scale: [0.06, 0.22, 0.74, 1, 1.04],
-                    x: [
-                      fishMouth.x,
-                      fishMouth.x + 6,
-                      bubble.x - 8,
-                      bubble.x,
-                      bubble.x + 8,
-                    ],
-                    y: [
-                      fishMouth.y,
-                      fishMouth.y - 34,
-                      bubble.y + 42,
-                      bubble.y,
-                      bubble.y - 18,
-                    ],
-                  }
-            }
+          <g
             className="text-bubble"
-            initial={false}
             key={bubble.text}
-            style={{ transformBox: "fill-box", transformOrigin: "center" }}
-            transition={
-              reduceMotion
-                ? undefined
-                : {
-                    delay: bubble.delay,
-                    duration: bubbleDurationSeconds,
-                    ease: "easeOut",
-                    repeat: Infinity,
-                    repeatDelay: bubbleCycleSeconds - bubbleDurationSeconds,
-                    times: [0, 0.2, 0.52, 0.78, 1],
-                  }
-            }
+            opacity={reduceMotion ? 1 : 0}
+            transform={`translate(${reduceMotion ? bubble.x : fishMouth.x} ${
+              reduceMotion ? bubble.y : fishMouth.y
+            })`}
           >
-            <rect x={bubble.width / -2} y="-14" width={bubble.width} height="28" rx="14" />
-            <text y="4.5" textAnchor="middle">
-              {bubble.text}
-            </text>
-          </motion.g>
+            {!reduceMotion && (
+              <>
+                <animate
+                  attributeName="opacity"
+                  begin={`${bubble.delay}s`}
+                  dur={`${bubbleCycleSeconds}s`}
+                  keyTimes={bubbleKeyTimes}
+                  repeatCount="indefinite"
+                  values="0.22;0.72;0.96;0.9;0;0"
+                />
+                <animateTransform
+                  attributeName="transform"
+                  begin={`${bubble.delay}s`}
+                  dur={`${bubbleCycleSeconds}s`}
+                  keyTimes={bubbleKeyTimes}
+                  repeatCount="indefinite"
+                  type="translate"
+                  values={`${fishMouth.x} ${fishMouth.y}; ${fishMouth.x + 6} ${
+                    fishMouth.y - 34
+                  }; ${bubble.x - 8} ${bubble.y + 42}; ${bubble.x} ${bubble.y}; ${
+                    bubble.x + 8
+                  } ${bubble.y - 18}; ${bubble.x + 8} ${bubble.y - 18}`}
+                />
+              </>
+            )}
+            <g transform={reduceMotion ? undefined : "scale(0.06)"}>
+              {!reduceMotion && (
+                <animateTransform
+                  attributeName="transform"
+                  begin={`${bubble.delay}s`}
+                  dur={`${bubbleCycleSeconds}s`}
+                  keyTimes={bubbleKeyTimes}
+                  repeatCount="indefinite"
+                  type="scale"
+                  values="0.06;0.22;0.74;1;1.04;1.04"
+                />
+              )}
+              <rect x={bubble.width / -2} y="-14" width={bubble.width} height="28" rx="14" />
+              <text y="4.5" textAnchor="middle">
+                {bubble.text}
+              </text>
+            </g>
+          </g>
         ))}
-        <motion.circle
-          animate={
-            reduceMotion
-              ? undefined
-              : {
-                  cx: [fishMouth.x, fishMouth.x + 7, fishMouth.x + 14],
-                  cy: [fishMouth.y, fishMouth.y - 34, fishMouth.y - 70],
-                  opacity: [0, 0.78, 0],
-                  r: [1, 4, 5],
-                }
-          }
-          className="tiny-bubble"
-          cx={fishMouth.x}
-          cy={fishMouth.y}
-          initial={false}
-          r="1"
-          transition={
-            reduceMotion
-              ? undefined
-              : {
-                  duration: 3.8,
-                  ease: "easeOut",
-                  repeat: Infinity,
-                  repeatDelay: bubbleCycleSeconds - 3.8,
-                }
-          }
-        />
-        <motion.circle
-          animate={
-            reduceMotion
-              ? undefined
-              : {
-                  cx: [fishMouth.x, fishMouth.x - 8, fishMouth.x - 12],
-                  cy: [fishMouth.y, fishMouth.y - 42, fishMouth.y - 82],
-                  opacity: [0, 0.64, 0],
-                  r: [1, 3, 4],
-                }
-          }
-          className="tiny-bubble"
-          cx={fishMouth.x}
-          cy={fishMouth.y}
-          initial={false}
-          r="1"
-          transition={
-            reduceMotion
-              ? undefined
-              : {
-                  delay: 7.2,
-                  duration: 3.8,
-                  ease: "easeOut",
-                  repeat: Infinity,
-                  repeatDelay: bubbleCycleSeconds - 3.8,
-                }
-          }
-        />
-        <motion.circle
-          animate={
-            reduceMotion
-              ? undefined
-              : {
-                  cx: [fishMouth.x, fishMouth.x + 2, fishMouth.x + 5],
-                  cy: [fishMouth.y, fishMouth.y - 50, fishMouth.y - 94],
-                  opacity: [0, 0.68, 0],
-                  r: [1, 3.5, 4.5],
-                }
-          }
-          className="tiny-bubble"
-          cx={fishMouth.x}
-          cy={fishMouth.y}
-          initial={false}
-          r="1"
-          transition={
-            reduceMotion
-              ? undefined
-              : {
-                  delay: 14.4,
-                  duration: 3.8,
-                  ease: "easeOut",
-                  repeat: Infinity,
-                  repeatDelay: bubbleCycleSeconds - 3.8,
-                }
-          }
-        />
+        {mouthPuffs.map((puff) => (
+          <circle
+            className="tiny-bubble"
+            cx={fishMouth.x}
+            cy={fishMouth.y}
+            key={`${puff.delay}-${puff.x}`}
+            opacity="0"
+            r="1"
+          >
+            {!reduceMotion && (
+              <>
+                <animate
+                  attributeName="opacity"
+                  begin={`${puff.delay}s`}
+                  dur={`${bubbleCycleSeconds}s`}
+                  keyTimes="0;0.05;0.14;0.18;1"
+                  repeatCount="indefinite"
+                  values="0;0.72;0.58;0;0"
+                />
+                <animate
+                  attributeName="cx"
+                  begin={`${puff.delay}s`}
+                  dur={`${bubbleCycleSeconds}s`}
+                  keyTimes="0;0.05;0.14;0.18;1"
+                  repeatCount="indefinite"
+                  values={`${fishMouth.x};${fishMouth.x + puff.x / 2};${
+                    fishMouth.x + puff.x
+                  };${fishMouth.x + puff.x};${fishMouth.x + puff.x}`}
+                />
+                <animate
+                  attributeName="cy"
+                  begin={`${puff.delay}s`}
+                  dur={`${bubbleCycleSeconds}s`}
+                  keyTimes="0;0.05;0.14;0.18;1"
+                  repeatCount="indefinite"
+                  values={`${fishMouth.y};${fishMouth.y + puff.y / 2};${
+                    fishMouth.y + puff.y
+                  };${fishMouth.y + puff.y};${fishMouth.y + puff.y}`}
+                />
+                <animate
+                  attributeName="r"
+                  begin={`${puff.delay}s`}
+                  dur={`${bubbleCycleSeconds}s`}
+                  keyTimes="0;0.05;0.14;0.18;1"
+                  repeatCount="indefinite"
+                  values={`1;${Math.max(2, puff.size - 1)};${puff.size};${puff.size};${puff.size}`}
+                />
+              </>
+            )}
+          </circle>
+        ))}
       </g>
     </svg>
   );
