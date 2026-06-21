@@ -12,8 +12,8 @@ Why Auth.js:
 Current shape:
 - Public routes: `/`, `/login`.
 - Protected route: `/app`.
-- Login page calls `signIn("github")` when GitHub OAuth env vars are configured.
-- The GitHub button remains disabled when provider env vars are missing.
+- Login page calls `signIn("github")` when GitHub OAuth env vars and `NEXTAUTH_SECRET` are configured.
+- The GitHub button remains disabled when required auth env vars are missing.
 - Middleware gates `/app/:path*` and `/app` also checks the server session before rendering.
 
 Required runtime secrets later:

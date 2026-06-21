@@ -1,6 +1,14 @@
 import NextAuth from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { NextResponse } from "next/server";
+import { authOptions, isAuthConfigured } from "@/lib/auth";
 
-const handler = NextAuth(authOptions);
+function authNotConfigured() {
+  return NextResponse.json(
+    { error: "Authentication is not configured." },
+    { status: 503 },
+  );
+}
+
+const handler = isAuthConfigured ? NextAuth(authOptions) : authNotConfigured;
 
 export { handler as GET, handler as POST };

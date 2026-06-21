@@ -1,15 +1,14 @@
 import Link from "next/link";
-import { getServerSession } from "next-auth";
 import { AuthActions } from "@/components/auth-actions";
 import { SiteNav } from "@/components/site-nav";
-import { authOptions, isGitHubAuthConfigured } from "@/lib/auth";
+import { getOptionalServerSession, isAuthConfigured } from "@/lib/auth";
 import { ROUTES } from "@/lib/routes";
 import { getUserDisplayName } from "@/lib/user";
 
 export const dynamic = "force-dynamic";
 
 export default async function LoginPage() {
-  const session = await getServerSession(authOptions);
+  const session = await getOptionalServerSession();
 
   return (
     <main className="page-stage auth-stage">
@@ -22,7 +21,7 @@ export default async function LoginPage() {
           <p>Signed in as {getUserDisplayName(session.user)}.</p>
         )}
         <AuthActions
-          canSignIn={isGitHubAuthConfigured}
+          canSignIn={isAuthConfigured}
           isSignedIn={Boolean(session?.user)}
         />
         <Link className="text-link" href={ROUTES.home}>

@@ -1,26 +1,33 @@
-import type { NextAuthOptions } from "next-auth";
+import { getServerSession, type NextAuthOptions } from "next-auth";
 import GitHubProvider from "next-auth/providers/github";
+import { authEnv, isAuthRuntimeConfigured } from "@/lib/auth-env";
 import { ROUTES } from "@/lib/routes";
 
-const githubClientId = process.env.GITHUB_ID;
-const githubClientSecret = process.env.GITHUB_SECRET;
 const githubProvider =
-  githubClientId && githubClientSecret
+  authEnv.githubClientId && authEnv.githubClientSecret
     ? GitHubProvider({
-        clientId: githubClientId,
-        clientSecret: githubClientSecret,
+        clientId: authEnv.githubClientId,
+        clientSecret: authEnv.githubClientSecret,
       })
     : null;
 
-export const isGitHubAuthConfigured = githubProvider !== null;
+export const isAuthConfigured = isAuthRuntimeConfigured && githubProvider !== null;
 
 export const authOptions: NextAuthOptions = {
   pages: {
     signIn: ROUTES.login,
   },
-  providers: githubProvider ? [githubProvider] : [],
+  providers: isAuthConfigured && githubProvider ? [githubProvider] : [],
   session: {
     strategy: "jwt",
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: authEnv.nextAuthSecret,
 };
+
+export async function getOptionalServerSession() {
+  if (!isAuthConfigured) {
+    return null;
+  }
+
+  return getServerSession(authOptions);
+}

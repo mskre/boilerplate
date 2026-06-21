@@ -1,14 +1,13 @@
-import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { SiteNav } from "@/components/site-nav";
-import { authOptions } from "@/lib/auth";
+import { getOptionalServerSession } from "@/lib/auth";
 import { ROUTES } from "@/lib/routes";
 import { getUserDisplayName } from "@/lib/user";
 
 export const dynamic = "force-dynamic";
 
 export default async function ProtectedAppPage() {
-  const session = await getServerSession(authOptions);
+  const session = await getOptionalServerSession();
 
   if (!session?.user) {
     redirect(ROUTES.login);
