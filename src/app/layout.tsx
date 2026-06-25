@@ -18,8 +18,8 @@ export default function RootLayout({
         {children}
         <Script
           defer
-          src="https://analytics.mskre.no/script.js"
-          data-website-id="9ea0a7c3-1139-438b-82f6-6a12c391e9d5"
+          src="https://analytics.mskre.no/api/script.js"
+          data-site-id="4"
           strategy="afterInteractive"
         />
       </body>
